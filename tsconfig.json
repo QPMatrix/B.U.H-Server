@@ -1,5 +1,14 @@
 {
   "compilerOptions": {
+    //Paths for imports
+    "paths": {
+      "@lib/*": ["./lib/*"],
+      "@controllers/*": ["./controllers/*"],
+      "@models/*": ["./models/*"],
+      "@services/*": ["./services/*"],
+      "@routes/*": ["./routes/*"],
+      "@config/*": ["./config/*"]
+    },
     // Enable latest features
     "lib": ["ESNext", "DOM"],
     "target": "ESNext",
