@@ -1,6 +1,6 @@
 import { prisma } from "@lib/prisma";
 import type { Request, Response } from "express";
-
+//Register a new user for the System
 export const register = async (req: Request, res: Response) => {
   //!Check if the body has all the required fields
   if (!req.body) {
@@ -47,5 +47,43 @@ export const register = async (req: Request, res: Response) => {
       .json(newUser.id);
   } catch (error) {
     res.status(500).send("Registration failed");
+  }
+};
+//Login function
+export const login = async (req: Request, res: Response) => {
+  //!Check if the body has all the required fields
+  if (!req.body) {
+    return res.status(400).send("No data in request body");
+  }
+  //? Destructure the required fields from the request body
+  const { email, phone, password } = req.body;
+  try {
+    let user;
+    if (!phone) {
+      user = await prisma.user.findUnique({
+        where: {
+          email: email,
+        },
+      });
+    } else if (!email) {
+      user = await prisma.user.findUnique({
+        where: {
+          phone: phone,
+        },
+      });
+    } else {
+      return res.status(400).send("Email or Phone is required");
+    }
+    //! Check if the user exists
+    if (!user) {
+      return res.status(400).send("User does not exist");
+    }
+    //! Compare the password
+    const isMatch = await Bun.password.verify(password, user.password);
+    if (!isMatch) {
+      return res.status(400).send("Invalid credentials");
+    }
+  } catch (error) {
+    res.status(500).send("Login failed");
   }
 };
