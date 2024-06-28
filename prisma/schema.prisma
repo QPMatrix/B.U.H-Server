@@ -25,6 +25,8 @@ model User {
   verificationToken    String?
   passwordResetToken   String?
   passwordResetExpires DateTime?
+  refreshToken         String?       @unique // Optional field for storing hashed refresh token
+  refreshTokenExpires  DateTime? // Expiration date for refresh token
 
   @@index([email])
   @@index([phone])
