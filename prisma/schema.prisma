@@ -21,8 +21,9 @@ model User {
   appointments         Appointment[]
   reviews              Review[]
   employee             Employee?
-  isVerified           Boolean       @default(false)
-  verificationToken    String?
+  isEmailVerified      Boolean       @default(false)
+  isPhoneVerified      Boolean       @default(false)
+  OTP_Code             String?
   passwordResetToken   String?
   passwordResetExpires DateTime?
   refreshToken         String?       @unique // Optional field for storing hashed refresh token

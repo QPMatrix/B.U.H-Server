@@ -162,3 +162,123 @@ export const logout = async (req: Request, res: Response) => {
     res.status(500).send("Internal Server Error");
   }
 };
+export const updatePassword = async (req: Request, res: Response) => {
+  const cookies = req.cookies;
+  if (!cookies?.jwt) return res.status(401).send("Unauthorized request");
+  const refreshToken = cookies.jwt;
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!);
+    if (typeof decoded !== "object" || !decoded.userId) {
+      return res.status(403).send("Invalid refresh token");
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { refreshToken: true },
+    });
+
+    if (!user || !user.refreshToken)
+      return res.status(403).send("No refresh token found");
+
+    const isValid = await Bun.password.verify(
+      refreshToken,
+      user.refreshToken,
+      "bcrypt"
+    );
+    if (!isValid) return res.status(403).send("Invalid refresh token");
+    const { currentPassword, newPassword } = req.body;
+    const currentUser = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+    });
+    if (!currentUser) return res.status(404).send("User not found");
+    const isMatch = await Bun.password.verify(
+      currentPassword,
+      currentUser.password,
+      "bcrypt"
+    );
+    if (!isMatch) return res.status(401).send("Invalid credentials");
+    const hashedPassword = await Bun.password.hash(newPassword, "bcrypt");
+    await prisma.user.update({
+      where: { id: decoded.userId },
+      data: { password: hashedPassword },
+    });
+    res.status(204).send("Password updated successfully");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+export const verifyEmail = async (req: Request, res: Response) => {
+  const cookies = req.cookies;
+  if (!cookies?.jwt) return res.status(401).send("Unauthorized request");
+  const refreshToken = cookies.jwt;
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!);
+    if (typeof decoded !== "object" || !decoded.userId) {
+      return res.status(403).send("Invalid refresh token");
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { refreshToken: true, OTP_Code: true },
+    });
+
+    if (!user || !user.refreshToken)
+      return res.status(403).send("No refresh token found");
+
+    const isValid = await Bun.password.verify(
+      refreshToken,
+      user.refreshToken,
+      "bcrypt"
+    );
+    if (!isValid) return res.status(403).send("Invalid refresh token");
+    const { OTP_INPUT_CODE } = req.body;
+    if (!OTP_INPUT_CODE) return res.status(400).send("OTP code is required");
+    if (OTP_INPUT_CODE !== user.OTP_Code)
+      return res.status(403).send("Invalid OTP code");
+    await prisma.user.update({
+      where: { id: decoded.userId },
+      data: { isEmailVerified: true, OTP_Code: null },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+export const verifyPhone = async (req: Request, res: Response) => {
+  const cookies = req.cookies;
+  if (!cookies?.jwt) return res.status(401).send("Unauthorized request");
+  const refreshToken = cookies.jwt;
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!);
+    if (typeof decoded !== "object" || !decoded.userId) {
+      return res.status(403).send("Invalid refresh token");
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { refreshToken: true, OTP_Code: true },
+    });
+
+    if (!user || !user.refreshToken)
+      return res.status(403).send("No refresh token found");
+
+    const isValid = await Bun.password.verify(
+      refreshToken,
+      user.refreshToken,
+      "bcrypt"
+    );
+    if (!isValid) return res.status(403).send("Invalid refresh token");
+    const { OTP_INPUT_CODE } = req.body;
+    if (!OTP_INPUT_CODE) return res.status(400).send("OTP code is required");
+    if (OTP_INPUT_CODE !== user.OTP_Code)
+      return res.status(403).send("Invalid OTP code");
+    await prisma.user.update({
+      where: { id: decoded.userId },
+      data: { isEmailVerified: true, OTP_Code: null },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+};
