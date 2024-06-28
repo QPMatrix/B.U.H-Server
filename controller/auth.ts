@@ -111,6 +111,7 @@ export const login = async (req: Request, res: Response) => {
     // Send the tokens to the client
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.status(200).json({ accessToken });
