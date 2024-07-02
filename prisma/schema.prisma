@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,7 +11,82 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id           String        @id @default(cuid())
+  email        String        @unique
+  phone        String        @unique
+  firstName    String
+  lastName     String
+  password     String
+  role         Role          @default(USER)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  location     Location?
+  Worker       Worker[]
+  Appointments Appointment[]
+}
+
+model Location {
+  id      String @id @default(cuid())
+  address String
+  city    String
+  state   String
+  country String
+  zipCode String
+  userId  String @unique
+  user    User   @relation(fields: [userId], references: [id])
+}
+
+model Worker {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  services    Service[]
+  schedules   Schedule[]
+  Appointment Appointment[]
+}
+
+model Service {
+  id           String        @id @default(cuid())
+  name         String
+  description  String
+  price        Float
+  duration     Int
+  workers      Worker[]
+  appointments Appointment[]
+}
+
+model Appointment {
+  id              String            @id @default(cuid())
+  userId          String
+  workerId        String
+  serviceId       String
+  appointmentTime DateTime
+  status          AppointmentStatus @default(PENDING)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  user            User              @relation(fields: [userId], references: [id])
+  worker          Worker            @relation(fields: [workerId], references: [id])
+  service         Service           @relation(fields: [serviceId], references: [id])
+}
+
+model Schedule {
+  id        String   @id @default(cuid())
+  workerId  String
+  dayOfWeek Int
+  startTime DateTime
+  endTime   DateTime
+  worker    Worker   @relation(fields: [workerId], references: [id])
+}
+
+enum Role {
+  USER
+  WORKER
+  ADMIN
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
 }

@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
-    //Paths for imports
+    // Paths for imports
+    "baseUrl": ".", // Base directory to resolve non-relative module names
     "paths": {
-      "@lib/*": ["./lib/*"],
-      "@controllers/*": ["./controllers/*"],
-      "@middleware/*": ["./middleware/*"],
-      "@services/*": ["./services/*"],
-      "@routes/*": ["./routes/*"],
-      "@config/*": ["./config/*"]
+      "@lib/*": ["lib/*"],
+      "@controllers/*": ["controllers/*"],
+      "@middleware/*": ["middleware/*"],
+      "@services/*": ["services/*"],
+      "@routes/*": ["routes/*"],
+      "@config/*": ["config/*"]
     },
     // Enable latest features
     "lib": ["ESNext", "DOM"],
